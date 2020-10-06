@@ -1,4 +1,5 @@
 from django.contrib.auth.models import User
+from django.core.validators import MinValueValidator
 from django.db import models
 
 
@@ -64,3 +65,32 @@ class RestaurantMenuItem(models.Model):
         unique_together = [
             ['restaurant', 'product']
         ]
+
+
+class Order(models.Model):
+    firstname = models.CharField('имя', max_length=50)
+    lastname = models.CharField('фамилия', max_length=50)
+    phone_number = models.CharField('мобильный номер', max_length=11)
+    address = models.CharField('адрес', max_length=100)
+
+    def __str__(self):
+        return f'{self.firstname} {self.lastname} {self.address}'
+
+    class Meta:
+        verbose_name = 'заказ'
+        verbose_name_plural = 'заказы'
+
+
+class OrderItem(models.Model):
+    product = models.ForeignKey(Product, on_delete=models.CASCADE,
+                                verbose_name='Товар', related_name='order_items')
+    quantity = models.PositiveSmallIntegerField('количество', validators=[MinValueValidator(1)])
+    order = models.ForeignKey(Order, on_delete=models.CASCADE,
+                              verbose_name='Заказ', related_name='items')
+
+    def __str__(self):
+        return f"{self.product.name} - {self.order}"
+
+    class Meta:
+        verbose_name = 'товар заказа'
+        verbose_name_plural = 'товары заказа'
