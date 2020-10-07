@@ -1,12 +1,12 @@
-import json
-
 from django.http import JsonResponse
 from django.templatetags.static import static
+from rest_framework import status
+from rest_framework.decorators import api_view
+from rest_framework.response import Response
 
-
-from .models import Product
 from .models import Order
 from .models import OrderItem
+from .models import Product
 
 
 def banners_list_api(request):
@@ -61,21 +61,20 @@ def product_list_api(request):
     })
 
 
+@api_view(['POST', ])
 def register_order(request):
-    order_data = json.loads(request.body.decode())
-
     order = Order.objects.create(
-        firstname=order_data["firstname"],
-        lastname=order_data["lastname"],
-        phone_number=order_data["phonenumber"],
-        address=order_data["address"]
+        firstname=request.data["firstname"],
+        lastname=request.data["lastname"],
+        phone_number=request.data["phonenumber"],
+        address=request.data["address"]
     )
 
-    for product in order_data["products"]:
+    for product in request.data["products"]:
         OrderItem.objects.create(
             product=Product.objects.get(pk=product['product']),
             quantity=product["quantity"],
             order=order
         )
 
-    return JsonResponse({})
+    return Response(request.data, status=status.HTTP_201_CREATED)
