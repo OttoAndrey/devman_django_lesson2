@@ -65,14 +65,33 @@ def product_list_api(request):
 def register_order(request):
     try:
         request.data["products"]
+        request.data["firstname"]
+        request.data["lastname"]
+        request.data["phonenumber"]
+        request.data["address"]
     except KeyError:
-        return Response(request.data, status=status.HTTP_400_BAD_REQUEST)
+        return Response({'error': 'One of the keys is not specified.'}, status=status.HTTP_400_BAD_REQUEST)
 
-    if not isinstance(request.data["products"], list):
-        return Response(request.data, status=status.HTTP_400_BAD_REQUEST)
+    if not isinstance(request.data["products"], list) \
+        or not isinstance(request.data["firstname"], str) \
+        or not isinstance(request.data["lastname"], str) \
+        or not isinstance(request.data["phonenumber"], str) \
+        or not isinstance(request.data["address"], str):
+        return Response({'error': 'One of the keys has wrong type.'}, status=status.HTTP_400_BAD_REQUEST)
 
     if len(request.data["products"]) == 0:
-        return Response(request.data, status=status.HTTP_400_BAD_REQUEST)
+        return Response({'error': 'Zero items.'}, status=status.HTTP_400_BAD_REQUEST)
+
+    if request.data["phonenumber"] == ''\
+        or request.data["firstname"] == ''\
+        or request.data["lastname"] == ''\
+        or request.data["phonenumber"] == ''\
+        or request.data["address"] == '':
+        return Response({'error': 'One of the keys is empty.'}, status=status.HTTP_400_BAD_REQUEST)
+
+    for product in request.data["products"]:
+        if not isinstance(product['product'], int):
+            return Response({'error': 'Product has wrong type.'}, status=status.HTTP_400_BAD_REQUEST)
 
     order = Order.objects.create(
         firstname=request.data["firstname"],
