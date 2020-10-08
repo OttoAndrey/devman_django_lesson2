@@ -63,6 +63,17 @@ def product_list_api(request):
 
 @api_view(['POST', ])
 def register_order(request):
+    try:
+        request.data["products"]
+    except KeyError:
+        return Response(request.data, status=status.HTTP_400_BAD_REQUEST)
+
+    if not isinstance(request.data["products"], list):
+        return Response(request.data, status=status.HTTP_400_BAD_REQUEST)
+
+    if len(request.data["products"]) == 0:
+        return Response(request.data, status=status.HTTP_400_BAD_REQUEST)
+
     order = Order.objects.create(
         firstname=request.data["firstname"],
         lastname=request.data["lastname"],
