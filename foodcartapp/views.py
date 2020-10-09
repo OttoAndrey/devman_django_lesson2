@@ -7,6 +7,7 @@ from rest_framework.response import Response
 from .models import Order
 from .models import OrderItem
 from .models import Product
+from .serializers import OrderSerializer
 
 
 def banners_list_api(request):
@@ -63,48 +64,19 @@ def product_list_api(request):
 
 @api_view(['POST', ])
 def register_order(request):
-    try:
-        request.data["products"]
-        request.data["firstname"]
-        request.data["lastname"]
-        request.data["phonenumber"]
-        request.data["address"]
-    except KeyError:
-        return Response({'error': 'One of the keys is not specified.'}, status=status.HTTP_400_BAD_REQUEST)
-
-    if not isinstance(request.data["products"], list) \
-        or not isinstance(request.data["firstname"], str) \
-        or not isinstance(request.data["lastname"], str) \
-        or not isinstance(request.data["phonenumber"], str) \
-        or not isinstance(request.data["address"], str):
-        return Response({'error': 'One of the keys has wrong type.'}, status=status.HTTP_400_BAD_REQUEST)
-
-    if len(request.data["products"]) == 0:
-        return Response({'error': 'Zero items.'}, status=status.HTTP_400_BAD_REQUEST)
-
-    if request.data["phonenumber"] == ''\
-        or request.data["firstname"] == ''\
-        or request.data["lastname"] == ''\
-        or request.data["phonenumber"] == ''\
-        or request.data["address"] == '':
-        return Response({'error': 'One of the keys is empty.'}, status=status.HTTP_400_BAD_REQUEST)
-
-    for product in request.data["products"]:
-        if not isinstance(product['product'], int):
-            return Response({'error': 'Product has wrong type.'}, status=status.HTTP_400_BAD_REQUEST)
+    serializer = OrderSerializer(data=request.data)
+    serializer.is_valid(raise_exception=True)
 
     order = Order.objects.create(
-        firstname=request.data["firstname"],
-        lastname=request.data["lastname"],
-        phone_number=request.data["phonenumber"],
-        address=request.data["address"]
+        firstname=serializer.validated_data["firstname"],
+        lastname=serializer.validated_data["lastname"],
+        phonenumber=serializer.validated_data["phonenumber"],
+        address=serializer.validated_data["address"]
     )
 
-    for product in request.data["products"]:
-        OrderItem.objects.create(
-            product=Product.objects.get(pk=product['product']),
-            quantity=product["quantity"],
-            order=order
-        )
+    products_fields = serializer.validated_data['products']
+    print(products_fields)
+    products = [OrderItem(order=order, **fields) for fields in products_fields]
+    OrderItem.objects.bulk_create(products)
 
     return Response(request.data, status=status.HTTP_201_CREATED)

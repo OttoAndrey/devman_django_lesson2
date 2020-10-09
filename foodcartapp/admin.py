@@ -118,10 +118,10 @@ class OrderAdmin(admin.ModelAdmin):
         'firstname',
         'lastname',
         'address',
-        'phone_number',
+        'phonenumber',
     ]
     list_display = [
-        'phone_number',
+        'phonenumber',
         'firstname',
         'lastname',
         'address',

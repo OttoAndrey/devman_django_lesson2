@@ -70,7 +70,7 @@ class RestaurantMenuItem(models.Model):
 class Order(models.Model):
     firstname = models.CharField('имя', max_length=50)
     lastname = models.CharField('фамилия', max_length=50)
-    phone_number = models.CharField('мобильный номер', max_length=11)
+    phonenumber = models.CharField('мобильный номер', max_length=11)
     address = models.CharField('адрес', max_length=100)
 
     def __str__(self):
