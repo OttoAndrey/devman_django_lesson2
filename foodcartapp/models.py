@@ -1,6 +1,7 @@
 from django.contrib.auth.models import User
 from django.core.validators import MinValueValidator
 from django.db import models
+from django.db.models import Sum
 
 
 class Restaurant(models.Model):
@@ -73,6 +74,9 @@ class Order(models.Model):
     phonenumber = models.CharField('мобильный номер', max_length=11)
     address = models.CharField('адрес', max_length=100)
 
+    def get_total_price(self):
+        return self.items.all().aggregate(Sum('price'))['price__sum']
+
     def __str__(self):
         return f'{self.firstname} {self.lastname} {self.address}'
 
@@ -87,6 +91,10 @@ class OrderItem(models.Model):
     quantity = models.PositiveSmallIntegerField('количество', validators=[MinValueValidator(1)])
     order = models.ForeignKey(Order, on_delete=models.CASCADE,
                               verbose_name='Заказ', related_name='items')
+    price = models.DecimalField('цена', max_digits=8, decimal_places=2, blank=True)
+
+    def calculate_price(self):
+        return self.product.price * self.quantity
 
     def __str__(self):
         return f"{self.product.name} - {self.order}"
