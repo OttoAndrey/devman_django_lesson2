@@ -3,6 +3,7 @@ from django.core.validators import MinValueValidator
 from django.db import models
 from django.db.models import Sum
 from django.urls import reverse
+from django.utils import timezone
 
 
 class Restaurant(models.Model):
@@ -88,6 +89,9 @@ class Order(models.Model):
     address = models.CharField('адрес', max_length=100)
     status = models.CharField('статус', max_length=2, choices=STATUSES, default='1')
     comment = models.TextField('комментарий', blank=True)
+    registrated_at = models.DateTimeField('поступил', default=timezone.now)
+    called_at = models.DateTimeField('дозвон', blank=True, null=True)
+    delivered_at = models.DateTimeField('доставлен', blank=True, null=True)
 
     def get_total_price(self):
         return self.items.all().aggregate(Sum('price'))['price__sum']
