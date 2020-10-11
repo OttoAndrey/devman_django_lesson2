@@ -86,7 +86,8 @@ class Order(models.Model):
     lastname = models.CharField('фамилия', max_length=50)
     phonenumber = models.CharField('мобильный номер', max_length=11)
     address = models.CharField('адрес', max_length=100)
-    status = models.CharField(max_length=2, choices=STATUSES, default='1')
+    status = models.CharField('статус', max_length=2, choices=STATUSES, default='1')
+    comment = models.TextField('комментарий', blank=True)
 
     def get_total_price(self):
         return self.items.all().aggregate(Sum('price'))['price__sum']
