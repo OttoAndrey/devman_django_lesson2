@@ -1,13 +1,19 @@
 from django.contrib import admin
+from django.http import HttpResponseRedirect
 from django.shortcuts import reverse
 from django.utils.html import format_html
+from django.utils.http import is_safe_url
+from environs import Env
 
+from .models import Order
+from .models import OrderItem
 from .models import Product
 from .models import ProductCategory
 from .models import Restaurant
 from .models import RestaurantMenuItem
-from .models import Order
-from .models import OrderItem
+
+env = Env()
+env.read_env()
 
 
 class RestaurantMenuItemInline(admin.TabularInline):
@@ -132,3 +138,9 @@ class OrderAdmin(admin.ModelAdmin):
     inlines = [
         OrderItemInline,
     ]
+
+    def response_change(self, request, obj):
+        next = request.GET.get('next', '/admin/foodcartapp/order/')
+        if not is_safe_url(next, allowed_hosts=env.list('ALLOWED_HOSTS')):
+            next = '/admin/foodcartapp/order/'
+        return HttpResponseRedirect(next)

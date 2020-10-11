@@ -2,6 +2,7 @@ from django.contrib.auth.models import User
 from django.core.validators import MinValueValidator
 from django.db import models
 from django.db.models import Sum
+from django.urls import reverse
 
 
 class Restaurant(models.Model):
@@ -76,6 +77,9 @@ class Order(models.Model):
 
     def get_total_price(self):
         return self.items.all().aggregate(Sum('price'))['price__sum']
+
+    def get_admin_change_url(self):
+        return reverse('admin:foodcartapp_order_change', args=(self.id,), current_app='foodcartapp')
 
     def __str__(self):
         return f'{self.firstname} {self.lastname} {self.address}'
