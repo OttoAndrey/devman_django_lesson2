@@ -83,15 +83,26 @@ class Order(models.Model):
         (ON_THE_WAY, 'В пути'),
         (DELIVERED, 'Доставлен')
     ]
+
+    CASH_TO_COURIER = '0'
+    INTERNET_PAYMENT = '1'
+    CARD_TO_COURIER = '2'
+    PAYMENT_METHODS = [
+        (CASH_TO_COURIER, 'Наличными курьеру'),
+        (INTERNET_PAYMENT, 'Интернет-оплата'),
+        (CARD_TO_COURIER, 'Картой курьеру')
+    ]
+
     firstname = models.CharField('имя', max_length=50)
     lastname = models.CharField('фамилия', max_length=50)
     phonenumber = models.CharField('мобильный номер', max_length=11)
     address = models.CharField('адрес', max_length=100)
-    status = models.CharField('статус', max_length=2, choices=STATUSES, default='1')
+    status = models.CharField('статус', max_length=2, choices=STATUSES, default=UNPROCESSED)
     comment = models.TextField('комментарий', blank=True)
     registrated_at = models.DateTimeField('поступил', default=timezone.now)
     called_at = models.DateTimeField('дозвон', blank=True, null=True)
     delivered_at = models.DateTimeField('доставлен', blank=True, null=True)
+    payment = models.CharField('способ оплаты', max_length=2, choices=PAYMENT_METHODS, default=CASH_TO_COURIER)
 
     def get_total_price(self):
         return self.items.all().aggregate(Sum('price'))['price__sum']
