@@ -1,3 +1,5 @@
+from collections import Counter
+
 from django.contrib.auth.models import User
 from django.core.validators import MinValueValidator
 from django.db import models
@@ -103,12 +105,47 @@ class Order(models.Model):
     called_at = models.DateTimeField('дозвон', blank=True, null=True)
     delivered_at = models.DateTimeField('доставлен', blank=True, null=True)
     payment = models.CharField('способ оплаты', max_length=2, choices=PAYMENT_METHODS, default=CASH_TO_COURIER)
+    restaurant = models.ForeignKey(Restaurant, null=True, blank=True,
+                                   on_delete=models.SET_NULL, verbose_name='ресторан',  related_name='orders')
 
     def get_total_price(self):
         return self.items.all().aggregate(Sum('price'))['price__sum']
 
     def get_admin_change_url(self):
         return reverse('admin:foodcartapp_order_change', args=(self.id,), current_app='foodcartapp')
+
+    def get_available_restaurants(self):
+        order_items = self.items.all()
+        available_restaurants = []
+        available_restaurants_for_each_product_in_order = []
+
+        for order_item in order_items:
+            available_restaurants_for_each_product_in_order.append([rmi.restaurant for rmi in RestaurantMenuItem.objects
+                                                                   .filter(product=order_item.product)
+                                                                   .filter(availability=True)])
+
+        if len(available_restaurants_for_each_product_in_order) == 0:
+            return ['Нет доступных ресторанов']
+
+        for available_restaurant in available_restaurants_for_each_product_in_order:
+            if len(available_restaurant) == 0:
+                return ['Нет доступных ресторанов']
+
+        all_restaurents = []
+        [all_restaurents.extend(available_restaurant) for available_restaurant in
+         available_restaurants_for_each_product_in_order]
+
+        all_restaurents_with_count = dict(Counter(all_restaurents))
+
+        for restaurant, restaurant_count in all_restaurents_with_count.items():
+            if not restaurant_count == len(available_restaurants_for_each_product_in_order):
+                continue
+            available_restaurants.append(restaurant)
+
+        if len(available_restaurants) == 0:
+            return ['Нет доступных ресторанов']
+
+        return available_restaurants
 
     def __str__(self):
         return f'{self.firstname} {self.lastname} {self.address}'

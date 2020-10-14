@@ -21,6 +21,7 @@
       <th>Телефон</th>
       <th>Адрес доставки</th>
       <th>Комментарий</th>
+      <th>Рестораны</th>
       <th>Ссылка на админку</th>
     </tr>
 
@@ -34,6 +35,14 @@
         <td>{{ item.phonenumber }}</td>
         <td>{{ item.address }}</td>
         <td>{{ item.comment }}</td>
+        <td>
+          <details>
+            <summary>Развернуть</summary>
+              {% for rest in item.get_available_restaurants %}
+                <p>{{ rest }}</p>
+              {% endfor %}
+          </details>
+        </td>
         <td>
           <a href="{{ item.get_admin_change_url }}?next={{ request.get_full_path|urlencode }}">Редактировать</a>
         </td>
