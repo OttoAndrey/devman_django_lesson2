@@ -131,3 +131,5 @@ REST_FRAMEWORK = {
         'rest_framework.renderers.BrowsableAPIRenderer',
     )
 }
+
+YA_GEOCODER_API_KEY = env.str('YA_GEOCODER_API_KEY')

@@ -1,14 +1,17 @@
-from django import forms
-from django.shortcuts import redirect, render
-from django.views import View
-from django.urls import reverse_lazy
-from django.contrib.auth.decorators import user_passes_test
+from collections import Counter
 
+import requests
+from django import forms
 from django.contrib.auth import authenticate, login
 from django.contrib.auth import views as auth_views
+from django.contrib.auth.decorators import user_passes_test
+from django.shortcuts import redirect, render
+from django.urls import reverse_lazy
+from django.views import View
+from geopy import distance
 
-
-from foodcartapp.models import Product, Restaurant, Order
+from StarBurger.settings import YA_GEOCODER_API_KEY
+from foodcartapp.models import Product, Restaurant, Order, RestaurantMenuItem
 
 
 class Login(forms.Form):
@@ -71,7 +74,6 @@ def view_products(request):
     default_availability = {restaurant.id: False for restaurant in restaurants}
     products_with_restaurants = []
     for product in products:
-
         availability = {
             **default_availability,
             **{item.restaurant_id: item.availability for item in product.menu_items.all()},
@@ -97,6 +99,66 @@ def view_restaurants(request):
 
 @user_passes_test(is_manager, login_url='restaurateur:login')
 def view_orders(request):
+    orders = Order.objects.all()
+
+    for order in orders:
+        order_items = order.items.all()
+        available_restaurants_for_each_product_in_order = []
+        available_restaurants_for_order = []
+        available_restaurants_with_distance = {}
+
+        for order_item in order_items:
+            available_restaurants_for_each_product_in_order.append([rmi.restaurant for rmi in RestaurantMenuItem.objects
+                                                                   .filter(product=order_item.product)
+                                                                   .filter(availability=True)])
+
+        if len(available_restaurants_for_each_product_in_order) == 0:
+            order.available_restaurants_with_distance = {'Нет доступных ресторанов': '0'}
+            continue
+
+        for available_restaurant in available_restaurants_for_each_product_in_order:
+            if len(available_restaurant) == 0:
+                order.available_restaurants_with_distance = {'Нет доступных ресторанов': '0'}
+                continue
+
+        all_restaurants = []
+        [all_restaurants.extend(available_restaurant) for available_restaurant in
+         available_restaurants_for_each_product_in_order]
+
+        all_restaurants_with_count = dict(Counter(all_restaurants))
+
+        for restaurant, restaurant_count in all_restaurants_with_count.items():
+            if not restaurant_count == len(available_restaurants_for_each_product_in_order):
+                continue
+            available_restaurants_for_order.append(restaurant)
+
+        if len(available_restaurants_for_order) == 0:
+            order.available_restaurants_with_distance = {'Нет доступных ресторанов': '0'}
+            continue
+
+        coords = fetch_coordinates(YA_GEOCODER_API_KEY, order.address)
+        order_coords = (coords[1], coords[0])
+
+        for rest in available_restaurants_for_order:
+            coords = fetch_coordinates(YA_GEOCODER_API_KEY, rest.address)
+            rest_coords = (coords[1], coords[0])
+            distance_between_rest_and_order = round(distance.distance(rest_coords, order_coords).km, 3)
+            available_restaurants_with_distance[rest] = distance_between_rest_and_order
+
+        order.available_restaurants_with_distance = dict(sorted(available_restaurants_with_distance.items(),
+                                                                key=lambda dist: dist[1]))
+
     return render(request, template_name='order_items.html', context={
-        'order_items': Order.objects.all(),
+        'order_items': orders,
     })
+
+
+def fetch_coordinates(apikey, place):
+    base_url = "https://geocode-maps.yandex.ru/1.x"
+    params = {"geocode": place, "apikey": apikey, "format": "json"}
+    response = requests.get(base_url, params=params)
+    response.raise_for_status()
+    places_found = response.json()['response']['GeoObjectCollection']['featureMember']
+    most_relevant = places_found[0]
+    lon, lat = most_relevant['GeoObject']['Point']['pos'].split(" ")
+    return lon, lat

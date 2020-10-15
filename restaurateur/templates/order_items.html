@@ -38,8 +38,8 @@
         <td>
           <details>
             <summary>Развернуть</summary>
-              {% for rest in item.get_available_restaurants %}
-                <p>{{ rest }}</p>
+              {% for rest, dist in item.available_restaurants_with_distance.items %}
+                <p>{{ rest }} - {{ dist }} км.</p>
               {% endfor %}
           </details>
         </td>
