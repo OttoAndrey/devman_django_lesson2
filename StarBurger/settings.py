@@ -133,3 +133,10 @@ REST_FRAMEWORK = {
 }
 
 YA_GEOCODER_API_KEY = env.str('YA_GEOCODER_API_KEY')
+
+CACHES = {
+    'default': {
+        'BACKEND': 'django.core.cache.backends.db.DatabaseCache',
+        'LOCATION': 'orders_cache_table',
+    }
+}

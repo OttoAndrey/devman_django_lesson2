@@ -5,6 +5,7 @@ from django import forms
 from django.contrib.auth import authenticate, login
 from django.contrib.auth import views as auth_views
 from django.contrib.auth.decorators import user_passes_test
+from django.core.cache import cache
 from django.shortcuts import redirect, render
 from django.urls import reverse_lazy
 from django.views import View
@@ -136,13 +137,21 @@ def view_orders(request):
             order.available_restaurants_with_distance = {'Нет доступных ресторанов': '0'}
             continue
 
-        coords = fetch_coordinates(YA_GEOCODER_API_KEY, order.address)
-        order_coords = (coords[1], coords[0])
+        if f'{order.__str__()}_coordinates' in cache:
+            coordinates = cache.get(f'{order.__str__()}_coordinates')
+        else:
+            coordinates = fetch_coordinates(YA_GEOCODER_API_KEY, order.address)
+            cache.set(f'{order.__str__()}_coordinates', coordinates, timeout=864000)
+        order_coordinates = (coordinates[1], coordinates[0])
 
         for rest in available_restaurants_for_order:
-            coords = fetch_coordinates(YA_GEOCODER_API_KEY, rest.address)
-            rest_coords = (coords[1], coords[0])
-            distance_between_rest_and_order = round(distance.distance(rest_coords, order_coords).km, 3)
+            if f'{rest.name}_coordinates' in cache:
+                coordinates = cache.get(f'{rest.name}_coordinates')
+            else:
+                coordinates = fetch_coordinates(YA_GEOCODER_API_KEY, rest.address)
+                cache.set(f'{rest.name}_coordinates', coordinates, timeout=864000)
+            rest_coordinates = (coordinates[1], coordinates[0])
+            distance_between_rest_and_order = round(distance.distance(rest_coordinates, order_coordinates).km, 3)
             available_restaurants_with_distance[rest] = distance_between_rest_and_order
 
         order.available_restaurants_with_distance = dict(sorted(available_restaurants_with_distance.items(),
