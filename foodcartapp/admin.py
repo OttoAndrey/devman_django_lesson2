@@ -140,7 +140,7 @@ class OrderAdmin(admin.ModelAdmin):
     ]
 
     def response_change(self, request, obj):
-        next = request.GET.get('next', '/admin/foodcartapp/order/')
+        page_after_change = request.GET.get('next', '/admin/foodcartapp/order/')
         if not is_safe_url(next, allowed_hosts=env.list('ALLOWED_HOSTS')):
-            next = '/admin/foodcartapp/order/'
-        return HttpResponseRedirect(next)
+            page_after_change = '/admin/foodcartapp/order/'
+        return HttpResponseRedirect(page_after_change)

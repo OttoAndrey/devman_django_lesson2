@@ -107,6 +107,7 @@ def view_orders(request):
         available_restaurants_for_each_product_in_order = []
         available_restaurants_for_order = []
         available_restaurants_with_distance = {}
+        order.available_restaurants_with_distance = {}
 
         for order_item in order_items:
             available_restaurants_for_each_product_in_order.append([rmi.restaurant for rmi in RestaurantMenuItem.objects
@@ -117,10 +118,13 @@ def view_orders(request):
             order.available_restaurants_with_distance = {'Нет доступных ресторанов': '0'}
             continue
 
-        for available_restaurant in available_restaurants_for_each_product_in_order:
-            if len(available_restaurant) == 0:
+        for available_restaurants in available_restaurants_for_each_product_in_order:
+            if len(available_restaurants) == 0:
                 order.available_restaurants_with_distance = {'Нет доступных ресторанов': '0'}
-                continue
+                break
+
+        if order.available_restaurants_with_distance == {'Нет доступных ресторанов': '0'}:
+            break
 
         all_restaurants = []
         [all_restaurants.extend(available_restaurant) for available_restaurant in
