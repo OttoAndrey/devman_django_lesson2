@@ -1,11 +1,11 @@
 from django.db import transaction
 from django.http import JsonResponse
-from django.templatetags.static import static
 from rest_framework import status
 from rest_framework.decorators import api_view, renderer_classes
 from rest_framework.renderers import JSONRenderer, BrowsableAPIRenderer
 from rest_framework.response import Response
 
+from banners.models import Banner
 from .models import Order
 from .models import OrderItem
 from .models import Product
@@ -13,24 +13,18 @@ from .serializers import OrderSerializer
 
 
 def banners_list_api(request):
-    # FIXME move data to db?
-    return JsonResponse([
-        {
-            'title': 'Burger',
-            'src': static('burger.jpg'),
-            'text': 'Tasty Burger at your door step',
-        },
-        {
-            'title': 'Spices',
-            'src': static('food.jpg'),
-            'text': 'All Cuisines',
-        },
-        {
-            'title': 'New York',
-            'src': static('tasty.jpg'),
-            'text': 'Food is incomplete without a tasty dessert',
+    banners = Banner.objects.filter(active=True)
+
+    dumped_banners = []
+    for banner in banners:
+        dumped_banner = {
+            'title': banner.title,
+            'src': banner.image.url,
+            'text': banner.text,
         }
-    ], safe=False, json_dumps_params={
+        dumped_banners.append(dumped_banner)
+
+    return JsonResponse(dumped_banners, safe=False, json_dumps_params={
         'ensure_ascii': False,
         'indent': 4,
     })
