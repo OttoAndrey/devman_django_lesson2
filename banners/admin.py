@@ -13,6 +13,7 @@ class BannerAdmin(SortableAdminMixin, admin.ModelAdmin):
         'active',
         'get_image_preview',
     ]
+    list_editable = ['active']
     readonly_fields = ['get_image_preview']
     prepopulated_fields = {'slug': ['title']}
 
