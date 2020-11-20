@@ -26,7 +26,7 @@ urlpatterns = [
     path('', render, kwargs={'template_name': 'index.html'}, name='start_page'),
     path('api/', include('foodcartapp.urls')),
     path('manager/', include('restaurateur.urls')),
-    path('banners/', include('banners.urls')),
+    path('api/', include('banners.urls')),
 ] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
 
 if settings.DEBUG:

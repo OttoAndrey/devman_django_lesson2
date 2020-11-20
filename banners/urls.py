@@ -6,5 +6,5 @@ app_name = "banners"
 
 
 urlpatterns = [
-    path('<slug:slug>/', banner_detail_view, name='banner_detail')
+    path('banners/<slug:slug>/', banner_detail_view, name='banner_detail')
 ]

@@ -11,6 +11,8 @@ def banner_detail_view(request, slug):
             'title': banner.title,
             'src': banner.image.url,
             'text': banner.text,
+            'active': banner.active,
+            'slug': banner.slug
         }
 
     return JsonResponse(data, json_dumps_params={'ensure_ascii': False, 'indent': 4})
