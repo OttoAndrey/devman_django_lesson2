@@ -31,6 +31,7 @@ INSTALLED_APPS = [
     'debug_toolbar',
     'rest_framework',
     'adminsortable2',
+    'rest_framework.authtoken',
 ]
 
 MIDDLEWARE = [
@@ -130,7 +131,11 @@ REST_FRAMEWORK = {
     'DEFAULT_RENDERER_CLASSES': [
         'rest_framework.renderers.JSONRenderer',
         'rest_framework.renderers.BrowsableAPIRenderer',
-    )
+    ],
+    'DEFAULT_AUTHENTICATION_CLASSES': [
+        'rest_framework.authentication.TokenAuthentication',
+    ],
+
 }
 
 YA_GEOCODER_API_KEY = env.str('YA_GEOCODER_API_KEY')
