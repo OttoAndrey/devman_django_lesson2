@@ -141,10 +141,11 @@ parcel build bundles-src/index.js -d bundles --public-url="./"
 
 Доступны 3 переменные:
 - `DEBUG` — дебаг-режим. Поставьте `True`, чтобы увидеть отладочную информацию в случае ошибки;
-- `SECRET_KEY` — секретный ключ проекта;
-- `ALLOWED_HOSTS` - доступные адреса;
+- `SECRET_KEY` — секретный ключ проекта. Им зашифрованы все пароли на вашем сайте, например. Не стоит использовать значение по-умолчанию;
+- `ALLOWED_HOSTS` — доступные адреса, [см. документацию Django](https://docs.djangoproject.com/en/3.1/ref/settings/#allowed-hosts);
 - `DATABASE_NAME` — путь до базы данных, например: `db.sqlite3`;
 - `YA_GEOCODER_API_KEY` - api ключ от [геокодера Яндекса](https://developer.tech.yandex.ru/services/).
+
 
 ## Цели проекта
 
