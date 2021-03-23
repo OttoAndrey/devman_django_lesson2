@@ -134,7 +134,12 @@ class OrderItem(models.Model):
         validators=(MinValueValidator(0.00),),
     )
 
-    def calculate_price(self):
+    def calculate_actual_price(self):
+        """Returns actual price of item.
+
+        `self.price` contains historical data
+        at the time the object was created.
+        """
         return self.product.price * self.quantity
 
     def __str__(self):

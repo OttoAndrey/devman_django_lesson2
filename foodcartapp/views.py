@@ -76,7 +76,7 @@ def register_order(request):
     products = [OrderItem(order=order, **fields) for fields in products_fields]
 
     for product in products:
-        product.price = product.calculate_price()
+        product.price = product.calculate_actual_price()
 
     OrderItem.objects.bulk_create(products)
 
