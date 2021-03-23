@@ -8,8 +8,10 @@ from rest_framework.viewsets import GenericViewSet
 from users.serializers import UsersSerializer
 
 
-class UsersViewSet(mixins.CreateModelMixin, mixins.RetrieveModelMixin,
-                   GenericViewSet):
+class CreateUserViewSet(
+        mixins.CreateModelMixin,
+        GenericViewSet,
+):
     serializer_class = UsersSerializer
     queryset = User.objects.all()
 
@@ -24,10 +26,11 @@ class UsersViewSet(mixins.CreateModelMixin, mixins.RetrieveModelMixin,
         headers = self.get_success_headers(serializer.data)
         token = Token.objects.create(user=user)
 
-        return Response({
-            'username': serializer.data['username'],
-            'token': token.key,
-        }, status=status.HTTP_201_CREATED, headers=headers)
+        return Response(
+            {'username': serializer.data['username'], 'token': token.key},
+            status=status.HTTP_201_CREATED,
+            headers=headers,
+        )
 
 
 class CustomAuthToken(ObtainAuthToken):
