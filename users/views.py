@@ -31,6 +31,10 @@ class UsersViewSet(mixins.CreateModelMixin, mixins.RetrieveModelMixin,
 
 
 class CustomAuthToken(ObtainAuthToken):
+    """Custom class which expects username and password and returns token.
+
+    Used custom class instead `obtain_auth_token` just for practice.
+    """
     def post(self, request, *args, **kwargs):
         serializer = self.serializer_class(data=request.data, context={'request': request})
         serializer.is_valid(raise_exception=True)
@@ -40,6 +44,6 @@ class CustomAuthToken(ObtainAuthToken):
         token, created = Token.objects.get_or_create(user=user)
 
         return Response({
-            'user': user.username,
+            'username': user.username,
             'token': token.key,
         })
