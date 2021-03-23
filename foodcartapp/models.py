@@ -70,11 +70,11 @@ class RestaurantMenuItem(models.Model):
 
 
 class Order(models.Model):
-    CANCELED = '0'
-    UNPROCESSED = '1'
-    IN_PROGRESS = '2'
-    ON_THE_WAY = '3'
-    DELIVERED = '4'
+    CANCELED = 0
+    UNPROCESSED = 1
+    IN_PROGRESS = 2
+    ON_THE_WAY = 3
+    DELIVERED = 4
     STATUSES = [
         (CANCELED, 'Отменен'),
         (UNPROCESSED, 'Необработанный'),
@@ -83,9 +83,9 @@ class Order(models.Model):
         (DELIVERED, 'Доставлен')
     ]
 
-    CASH_TO_COURIER = '0'
-    INTERNET_PAYMENT = '1'
-    CARD_TO_COURIER = '2'
+    CASH_TO_COURIER = 0
+    INTERNET_PAYMENT = 1
+    CARD_TO_COURIER = 2
     PAYMENT_METHODS = [
         (CASH_TO_COURIER, 'Наличными курьеру'),
         (INTERNET_PAYMENT, 'Интернет-оплата'),
@@ -96,12 +96,12 @@ class Order(models.Model):
     lastname = models.CharField('фамилия', max_length=50)
     phonenumber = models.CharField('мобильный номер', max_length=11)
     address = models.CharField('адрес', max_length=100)
-    status = models.CharField('статус', max_length=2, choices=STATUSES, default=UNPROCESSED)
+    status = models.IntegerField('статус', choices=STATUSES, default=UNPROCESSED)
     comment = models.TextField('комментарий', blank=True)
     registrated_at = models.DateTimeField('поступил', default=timezone.now)
     called_at = models.DateTimeField('дозвон', blank=True, null=True)
     delivered_at = models.DateTimeField('доставлен', blank=True, null=True)
-    payment = models.CharField('способ оплаты', max_length=2, choices=PAYMENT_METHODS, default=CASH_TO_COURIER)
+    payment = models.IntegerField('способ оплаты', choices=PAYMENT_METHODS, default=CASH_TO_COURIER)
     restaurant = models.ForeignKey(Restaurant, null=True, blank=True,
                                    on_delete=models.SET_NULL, verbose_name='ресторан',  related_name='orders')
 
