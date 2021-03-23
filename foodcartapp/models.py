@@ -3,6 +3,7 @@ from django.db import models
 from django.db.models import Sum
 from django.urls import reverse
 from django.utils import timezone
+from phonenumber_field.modelfields import PhoneNumberField
 
 
 class Restaurant(models.Model):
@@ -94,7 +95,7 @@ class Order(models.Model):
 
     firstname = models.CharField('имя', max_length=50)
     lastname = models.CharField('фамилия', max_length=50)
-    phonenumber = models.CharField('мобильный номер', max_length=11)
+    phonenumber = PhoneNumberField('мобильный номер')
     address = models.CharField('адрес', max_length=100)
     status = models.IntegerField('статус', choices=STATUSES, default=UNPROCESSED)
     comment = models.TextField('комментарий', blank=True)

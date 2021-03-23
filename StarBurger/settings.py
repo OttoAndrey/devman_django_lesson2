@@ -32,6 +32,7 @@ INSTALLED_APPS = [
     'rest_framework',
     'adminsortable2',
     'rest_framework.authtoken',
+    'phonenumber_field',
 ]
 
 MIDDLEWARE = [
@@ -146,3 +147,6 @@ CACHES = {
         'LOCATION': 'orders_cache_table',
     }
 }
+
+PHONENUMBER_DB_FORMAT = 'E164'
+PHONENUMBER_DEFAULT_REGION = 'RU'
