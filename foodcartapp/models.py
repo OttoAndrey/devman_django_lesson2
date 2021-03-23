@@ -1,9 +1,10 @@
 from django.core.validators import MinValueValidator
 from django.db import models
-from django.db.models import Sum
 from django.urls import reverse
 from django.utils import timezone
 from phonenumber_field.modelfields import PhoneNumberField
+
+from foodcartapp.querysets import OrderQuerySet, ProductQuerySet
 
 
 class Restaurant(models.Model):
@@ -17,11 +18,6 @@ class Restaurant(models.Model):
     class Meta:
         verbose_name = 'ресторан'
         verbose_name_plural = 'рестораны'
-
-
-class ProductQuerySet(models.QuerySet):
-    def available(self):
-        return self.distinct().filter(menu_items__availability=True)
 
 
 class ProductCategory(models.Model):
@@ -106,8 +102,7 @@ class Order(models.Model):
     restaurant = models.ForeignKey(Restaurant, null=True, blank=True,
                                    on_delete=models.SET_NULL, verbose_name='ресторан',  related_name='orders')
 
-    def get_total_price(self):
-        return self.items.all().aggregate(Sum('price'))['price__sum']
+    objects = OrderQuerySet.as_manager()
 
     def get_admin_change_url(self):
         return reverse('admin:foodcartapp_order_change', args=(self.id,), current_app='foodcartapp')
