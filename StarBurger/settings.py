@@ -33,6 +33,7 @@ INSTALLED_APPS = [
     'adminsortable2',
     'rest_framework.authtoken',
     'phonenumber_field',
+    'django_extensions',
 ]
 
 MIDDLEWARE = [
