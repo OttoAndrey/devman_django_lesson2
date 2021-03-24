@@ -9,7 +9,7 @@ from django.core.cache import cache
 from django.shortcuts import redirect, render
 from django.urls import reverse_lazy
 from django.views import View
-from geopy import distance
+from geopy.distance import distance
 
 from StarBurger.settings import YA_GEOCODER_API_KEY
 from foodcartapp.models import Product, Restaurant, Order, RestaurantMenuItem
@@ -98,72 +98,69 @@ def view_restaurants(request):
     })
 
 
+def get_available_restaurants(order):
+    """Returns a list of restaurants that can fulfill an order."""
+    restaurants = Restaurant.objects.all()
+    available_restaurants = []
+    order_items = set(order.items.values_list('product__name', flat=True))
+    for restaurant in restaurants:
+        restaurant_items = (
+            restaurant.menu_items
+            .filter(availability=True)
+            .values_list('product__name', flat=True)
+        )
+        if order_items.issubset(restaurant_items):
+            available_restaurants.append(restaurant)
+    return available_restaurants
+
+
+def get_distance_between_restaurants_and_order(order, restaurants):
+    """Calculates the distance between restaurants and the order address."""
+    restaurants_with_distance = {}
+    order_coordinates = get_coordinates(order)
+
+    for restaurant in restaurants:
+        rest_coordinates = get_coordinates(restaurant)
+        distance_between_restaurant_and_order = round(
+            distance(rest_coordinates, order_coordinates).km,
+            ndigits=3,
+        )
+        restaurants_with_distance[restaurant] = (
+            distance_between_restaurant_and_order
+        )
+    sorted(restaurants_with_distance.items(), key=lambda dist: dist[1])
+
+    return restaurants_with_distance
+
+
+def get_coordinates(instance):
+    """Returns coordinates of object."""
+    if (coordinate_name := f'{instance.__str__()}_coordinates') in cache:
+        coordinates = cache.get(coordinate_name)
+    else:
+        coordinates = fetch_coordinates(YA_GEOCODER_API_KEY, instance.address)
+        cache.set(coordinate_name, coordinates, timeout=864000)
+    return coordinates[1], coordinates[0]
+
+
 @user_passes_test(is_manager, login_url='restaurateur:login')
 def view_orders(request):
     orders = Order.objects.get_total_price()
 
     for order in orders:
-        order_items = order.items.all()
-        available_restaurants_for_each_product_in_order = []
-        available_restaurants_for_order = []
-        available_restaurants_with_distance = {}
-        order.available_restaurants_with_distance = {}
+        available_restaurants = get_available_restaurants(order)
+        order.available_restaurants_with_distance = (
+            get_distance_between_restaurants_and_order(
+                order,
+                available_restaurants,
+            )
+        )
 
-        for order_item in order_items:
-            available_restaurants_for_each_product_in_order.append([rmi.restaurant for rmi in RestaurantMenuItem.objects
-                                                                   .filter(product=order_item.product)
-                                                                   .filter(availability=True)])
-
-        if len(available_restaurants_for_each_product_in_order) == 0:
-            order.available_restaurants_with_distance = {'Нет доступных ресторанов': '0'}
-            continue
-
-        for available_restaurants in available_restaurants_for_each_product_in_order:
-            if len(available_restaurants) == 0:
-                order.available_restaurants_with_distance = {'Нет доступных ресторанов': '0'}
-                break
-
-        if order.available_restaurants_with_distance == {'Нет доступных ресторанов': '0'}:
-            break
-
-        all_restaurants = []
-        [all_restaurants.extend(available_restaurant) for available_restaurant in
-         available_restaurants_for_each_product_in_order]
-
-        all_restaurants_with_count = dict(Counter(all_restaurants))
-
-        for restaurant, restaurant_count in all_restaurants_with_count.items():
-            if not restaurant_count == len(available_restaurants_for_each_product_in_order):
-                continue
-            available_restaurants_for_order.append(restaurant)
-
-        if len(available_restaurants_for_order) == 0:
-            order.available_restaurants_with_distance = {'Нет доступных ресторанов': '0'}
-            continue
-
-        if f'{order.__str__()}_coordinates' in cache:
-            coordinates = cache.get(f'{order.__str__()}_coordinates')
-        else:
-            coordinates = fetch_coordinates(YA_GEOCODER_API_KEY, order.address)
-            cache.set(f'{order.__str__()}_coordinates', coordinates, timeout=864000)
-        order_coordinates = (coordinates[1], coordinates[0])
-
-        for rest in available_restaurants_for_order:
-            if f'{rest.name}_coordinates' in cache:
-                coordinates = cache.get(f'{rest.name}_coordinates')
-            else:
-                coordinates = fetch_coordinates(YA_GEOCODER_API_KEY, rest.address)
-                cache.set(f'{rest.name}_coordinates', coordinates, timeout=864000)
-            rest_coordinates = (coordinates[1], coordinates[0])
-            distance_between_rest_and_order = round(distance.distance(rest_coordinates, order_coordinates).km, 3)
-            available_restaurants_with_distance[rest] = distance_between_rest_and_order
-
-        order.available_restaurants_with_distance = dict(sorted(available_restaurants_with_distance.items(),
-                                                                key=lambda dist: dist[1]))
-
-    return render(request, template_name='order_items.html', context={
-        'order_items': orders,
-    })
+    return render(
+        request,
+        template_name='order_items.html',
+        context={'order_items': orders},
+    )
 
 
 def fetch_coordinates(apikey, place):
