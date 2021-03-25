@@ -11,7 +11,7 @@ from django.urls import reverse_lazy
 from django.views import View
 from geopy.distance import distance
 
-from StarBurger.settings import YA_GEOCODER_API_KEY
+from star_burger.settings import YA_GEOCODER_API_KEY
 from foodcartapp.models import Product, Restaurant, Order, RestaurantMenuItem
 
 
