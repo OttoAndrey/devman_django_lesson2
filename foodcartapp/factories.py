@@ -19,6 +19,15 @@ class RestaurantFactory(factory.django.DjangoModelFactory):
         model = models.Restaurant
 
 
+class RestaurantMenuItemFactory(factory.django.DjangoModelFactory):
+    restaurant = factory.Iterator(models.Restaurant.objects.all())
+    product = factory.Iterator(models.Product.objects.all())
+    availability = factory.fuzzy.FuzzyChoice([True, False])
+
+    class Meta:
+        model = models.RestaurantMenuItem
+
+
 class OrderFactory(factory.django.DjangoModelFactory):
     firstname = factory.Faker('first_name')
     lastname = factory.Faker('last_name')
@@ -31,7 +40,7 @@ class OrderFactory(factory.django.DjangoModelFactory):
 
 class ProductFactory(factory.django.DjangoModelFactory):
     name = factory.Faker('sentence', nb_words=3)
-    category = ProductCategoryFactory()
+    category = factory.Iterator(models.ProductCategory.objects.all())
     price = factory.fuzzy.FuzzyDecimal(150.00, 400.00)
     image = factory.django.ImageField(
         color=factory.fuzzy.FuzzyChoice(['magenta', 'blue', 'green']),
