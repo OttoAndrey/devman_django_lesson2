@@ -57,5 +57,54 @@ class OrderItemFactory(factory.django.DjangoModelFactory):
     quantity = factory.fuzzy.FuzzyInteger(1, 10)
     order = factory.Iterator(models.Order.objects.all())
 
+    # TODO fix it
+    price = 100
+
     class Meta:
         model = models.OrderItem
+
+
+class OrderWithProductsFactory(OrderFactory):
+    items = factory.RelatedFactoryList(
+        factory=OrderItemFactory,
+        factory_related_name='order',
+        size=2,
+    )
+
+
+class RestaurantMenuItemWithAllAvailabilityProductsFactory(
+        factory.django.DjangoModelFactory,
+):
+    restaurant = factory.Iterator(models.Restaurant.objects.all())
+    product = factory.Iterator(models.Product.objects.all())
+    availability = True
+
+    class Meta:
+        model = models.RestaurantMenuItem
+
+
+class RestaurantMenuItemWithoutAllAvailabilityProductsFactory(
+        factory.django.DjangoModelFactory,
+):
+    restaurant = factory.Iterator(models.Restaurant.objects.all())
+    product = factory.Iterator(models.Product.objects.all())
+    availability = False
+
+    class Meta:
+        model = models.RestaurantMenuItem
+
+
+class RestaurantWithAllAvailabilityProductsFactory(RestaurantFactory):
+    menu_items = factory.RelatedFactoryList(
+        factory=RestaurantMenuItemWithAllAvailabilityProductsFactory,
+        factory_related_name='restaurant',
+        size=2,
+    )
+
+
+class RestaurantWithoutAllAvailabilityProductsFactory(RestaurantFactory):
+    menu_items = factory.RelatedFactoryList(
+        factory=RestaurantMenuItemWithoutAllAvailabilityProductsFactory,
+        factory_related_name='restaurant',
+        size=2,
+    )
