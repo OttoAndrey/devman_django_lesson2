@@ -59,6 +59,12 @@ pip install -r requirements.txt
 python manage.py migrate
 ```
 
+Создайте таблицу для кэширования:
+
+```sh
+python manage.py createcachetable
+```
+
 Запустите сервер:
 
 ```sh
