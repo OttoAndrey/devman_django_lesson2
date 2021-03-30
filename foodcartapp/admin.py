@@ -3,7 +3,7 @@ from django.http import HttpResponseRedirect
 from django.shortcuts import reverse
 from django.templatetags.static import static
 from django.utils.html import format_html
-from django.utils.http import is_safe_url
+from django.utils.http import url_has_allowed_host_and_scheme
 from environs import Env
 
 from .models import Order
@@ -141,7 +141,13 @@ class OrderAdmin(admin.ModelAdmin):
     ]
 
     def response_change(self, request, obj):
-        page_after_change = request.GET.get('next', '/admin/foodcartapp/order/')
-        if not is_safe_url(next, allowed_hosts=env.list('ALLOWED_HOSTS')):
+        page_after_change = request.GET.get(
+            'next',
+            '/admin/foodcartapp/order/',
+        )
+        if not url_has_allowed_host_and_scheme(
+                page_after_change,
+                allowed_hosts=env.list('ALLOWED_HOSTS'),
+        ):
             page_after_change = '/admin/foodcartapp/order/'
         return HttpResponseRedirect(page_after_change)
