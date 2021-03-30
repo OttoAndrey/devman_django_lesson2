@@ -1,6 +1,7 @@
 from unittest.mock import patch
 
 from django.contrib.auth.models import User
+from django.db.models import Prefetch
 from django.test import TestCase
 from django.urls import reverse
 
@@ -11,7 +12,7 @@ from foodcartapp.factories import (
     RestaurantWithAllAvailabilityProductsFactory,
     RestaurantWithoutAllAvailabilityProductsFactory,
 )
-from foodcartapp.models import Order, Restaurant
+from foodcartapp.models import Order, Restaurant, RestaurantMenuItem
 from restaurateur.factories import SuperUserFactory
 from restaurateur.views import (
     get_available_restaurants,
@@ -33,7 +34,15 @@ class ServicesTests(TestCase):
 
     def test_get_available_restaurants(self):
         order = Order.objects.last()
-        available_restaurants = get_available_restaurants(order)
+        restaurants = Restaurant.objects.prefetch_related(
+            Prefetch(
+                'menu_items',
+                RestaurantMenuItem.objects
+                .filter(availability=True)
+                .select_related('product'),
+            )
+        )
+        available_restaurants = get_available_restaurants(order, restaurants)
 
         self.assertEqual(Restaurant.objects.count(), 2)
         self.assertEqual(len(available_restaurants), 1)
@@ -50,7 +59,8 @@ class ServicesTests(TestCase):
         get_coordinates = mock_get_coordinates()
         get_coordinates.return_value = ('55.7522', '37.6156')
         order = Order.objects.last()
-        available_restaurants = get_available_restaurants(order)
+        restaurants = Restaurant.objects.all()
+        available_restaurants = get_available_restaurants(order, restaurants)
         restaurants_with_distance = get_distance_between_restaurants_and_order(
             order,
             available_restaurants,
