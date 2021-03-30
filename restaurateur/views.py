@@ -1,18 +1,17 @@
-from collections import Counter
-
 import requests
 from django import forms
 from django.contrib.auth import authenticate, login
 from django.contrib.auth import views as auth_views
 from django.contrib.auth.decorators import user_passes_test
 from django.core.cache import cache
+from django.db.models import Prefetch
 from django.shortcuts import redirect, render
 from django.urls import reverse_lazy
 from django.views import View
 from geopy.distance import distance
 
+from foodcartapp.models import Order, Product, Restaurant, RestaurantMenuItem
 from star_burger.settings import YA_GEOCODER_API_KEY
-from foodcartapp.models import Product, Restaurant, Order, RestaurantMenuItem
 
 
 class Login(forms.Form):
@@ -77,9 +76,11 @@ def view_products(request):
     for product in products:
         availability = {
             **default_availability,
-            **{item.restaurant_id: item.availability for item in product.menu_items.all()},
+            **{item.restaurant_id: item.availability for item in
+               product.menu_items.all()},
         }
-        orderer_availability = [availability[restaurant.id] for restaurant in restaurants]
+        orderer_availability = [availability[restaurant.id] for restaurant in
+                                restaurants]
 
         products_with_restaurants.append(
             (product, orderer_availability)
@@ -98,16 +99,13 @@ def view_restaurants(request):
     })
 
 
-def get_available_restaurants(order):
+def get_available_restaurants(order, restaurants):
     """Returns a list of restaurants that can fulfill an order."""
-    restaurants = Restaurant.objects.all()
     available_restaurants = []
-    order_items = set(order.items.values_list('product__name', flat=True))
+    order_items = set(item.product.id for item in order.items.all())
     for restaurant in restaurants:
-        restaurant_items = (
-            restaurant.menu_items
-            .filter(availability=True)
-            .values_list('product__name', flat=True)
+        restaurant_items = set(
+            item.product.id for item in restaurant.menu_items.all()
         )
         if order_items.issubset(restaurant_items):
             available_restaurants.append(restaurant)
@@ -145,10 +143,21 @@ def get_coordinates(instance):
 
 @user_passes_test(is_manager, login_url='restaurateur:login')
 def view_orders(request):
-    orders = Order.objects.get_total_price()
+    orders = (
+        Order.objects.get_total_price()
+        .prefetch_related('items__product')
+    )
+    restaurants = Restaurant.objects.prefetch_related(
+        Prefetch(
+            'menu_items',
+            RestaurantMenuItem.objects
+            .filter(availability=True)
+            .select_related('product'),
+        )
+    )
 
     for order in orders:
-        available_restaurants = get_available_restaurants(order)
+        available_restaurants = get_available_restaurants(order, restaurants)
         order.available_restaurants_with_distance = (
             get_distance_between_restaurants_and_order(
                 order,
