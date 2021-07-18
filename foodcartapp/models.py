@@ -12,12 +12,12 @@ class Restaurant(models.Model):
     address = models.CharField('адрес', max_length=100, blank=True)
     contact_phone = models.CharField('контактный телефон', max_length=50, blank=True)
 
-    def __str__(self):
-        return self.name
-
     class Meta:
         verbose_name = 'ресторан'
         verbose_name_plural = 'рестораны'
+
+    def __str__(self):
+        return self.name
 
 
 class ProductCategory(models.Model):
@@ -47,12 +47,12 @@ class Product(models.Model):
 
     objects = ProductQuerySet.as_manager()
 
-    def __str__(self):
-        return self.name
-
     class Meta:
         verbose_name = 'товар'
         verbose_name_plural = 'товары'
+
+    def __str__(self):
+        return self.name
 
 
 class RestaurantMenuItem(models.Model):
@@ -62,15 +62,15 @@ class RestaurantMenuItem(models.Model):
                                 verbose_name='продукт')
     availability = models.BooleanField('в продаже', default=True, db_index=True)
 
-    def __str__(self):
-        return f"{self.restaurant.name} - {self.product.name}"
-
     class Meta:
         verbose_name = 'пункт меню ресторана'
         verbose_name_plural = 'пункты меню ресторана'
         unique_together = [
             ['restaurant', 'product']
         ]
+
+    def __str__(self):
+        return f"{self.restaurant.name} - {self.product.name}"
 
 
 class Order(models.Model):
@@ -84,7 +84,7 @@ class Order(models.Model):
         (UNPROCESSED, 'Необработанный'),
         (IN_PROGRESS, 'Выполняется'),
         (ON_THE_WAY, 'В пути'),
-        (DELIVERED, 'Доставлен')
+        (DELIVERED, 'Доставлен'),
     ]
 
     CASH_TO_COURIER = 0
@@ -93,7 +93,7 @@ class Order(models.Model):
     PAYMENT_METHODS = [
         (CASH_TO_COURIER, 'Наличными курьеру'),
         (INTERNET_PAYMENT, 'Интернет-оплата'),
-        (CARD_TO_COURIER, 'Картой курьеру')
+        (CARD_TO_COURIER, 'Картой курьеру'),
     ]
 
     firstname = models.CharField('имя', max_length=50)
@@ -111,15 +111,15 @@ class Order(models.Model):
 
     objects = OrderQuerySet.as_manager()
 
-    def get_admin_change_url(self):
-        return reverse('admin:foodcartapp_order_change', args=(self.id,), current_app='foodcartapp')
+    class Meta:
+        verbose_name = 'заказ'
+        verbose_name_plural = 'заказы'
 
     def __str__(self):
         return f'{self.firstname} {self.lastname} {self.address}'
 
-    class Meta:
-        verbose_name = 'заказ'
-        verbose_name_plural = 'заказы'
+    def get_admin_change_url(self):
+        return reverse('admin:foodcartapp_order_change', args=(self.id,), current_app='foodcartapp')
 
 
 class OrderItem(models.Model):
@@ -136,6 +136,13 @@ class OrderItem(models.Model):
         validators=(MinValueValidator(0.00),),
     )
 
+    class Meta:
+        verbose_name = 'товар заказа'
+        verbose_name_plural = 'товары заказа'
+
+    def __str__(self):
+        return f"{self.product.name} - {self.order}"
+
     def calculate_actual_price(self):
         """Returns actual price of item.
 
@@ -143,10 +150,3 @@ class OrderItem(models.Model):
         at the time the object was created.
         """
         return self.product.price * self.quantity
-
-    def __str__(self):
-        return f"{self.product.name} - {self.order}"
-
-    class Meta:
-        verbose_name = 'товар заказа'
-        verbose_name_plural = 'товары заказа'
