@@ -105,7 +105,7 @@ class Order(models.Model):
     registrated_at = models.DateTimeField('поступил', default=timezone.now, db_index=True)
     called_at = models.DateTimeField('дозвон', blank=True, null=True, db_index=True)
     delivered_at = models.DateTimeField('доставлен', blank=True, null=True, db_index=True)
-    payment = models.IntegerField('способ оплаты', choices=PAYMENT_METHODS, default=CASH_TO_COURIER, db_index=True)
+    payment = models.IntegerField('способ оплаты', choices=PAYMENT_METHODS, db_index=True)
     restaurant = models.ForeignKey(Restaurant, null=True, blank=True,
                                    on_delete=models.SET_NULL, verbose_name='ресторан',  related_name='orders')
 
