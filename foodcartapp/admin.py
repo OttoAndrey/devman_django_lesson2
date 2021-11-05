@@ -138,13 +138,12 @@ class OrderAdmin(admin.ModelAdmin):
     ]
 
     def response_change(self, request, obj):
-        page_after_change = request.GET.get(
-            'next',
-            '/admin/foodcartapp/order/',
-        )
-        if not url_has_allowed_host_and_scheme(
-                page_after_change,
-                allowed_hosts=env.list('ALLOWED_HOSTS'),
-        ):
-            page_after_change = '/admin/foodcartapp/order/'
-        return HttpResponseRedirect(page_after_change)
+        if page_after_change := request.GET.get('next'):
+            if not url_has_allowed_host_and_scheme(
+                    page_after_change,
+                    allowed_hosts=env.list('ALLOWED_HOSTS'),
+            ):
+                page_after_change = Order.get_admin_change_url(obj)
+            return HttpResponseRedirect(page_after_change)
+
+        return super().response_change(request, obj)
