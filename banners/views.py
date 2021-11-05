@@ -1,18 +1,14 @@
-from django.http import JsonResponse
-from django.shortcuts import get_object_or_404
+from rest_framework.decorators import api_view
+from rest_framework.generics import get_object_or_404
+from rest_framework.response import Response
 
 from banners.models import Banner
+from banners.serializers import BannerSerializer
 
 
+@api_view(['GET'])
 def banner_detail_view(request, slug):
     banner = get_object_or_404(Banner, slug=slug)
+    serializer = BannerSerializer(banner)
 
-    data = {
-            'title': banner.title,
-            'src': banner.image.url,
-            'text': banner.text,
-            'active': banner.active,
-            'slug': banner.slug
-        }
-
-    return JsonResponse(data, json_dumps_params={'ensure_ascii': False, 'indent': 4})
+    return Response(serializer.data)
