@@ -12,18 +12,12 @@ BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
 
 
-# SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = env.str('SECRET_KEY', 'some-secret-key-for-local-env')
-
-# SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = env.bool('DEBUG', default=False)
+SECRET_KEY = env('SECRET_KEY', 'some-secret-key-for-local-env')
+DEBUG = env.bool('DEBUG', True)
 
 ALLOWED_HOSTS = env.list('ALLOWED_HOSTS', ['127.0.0.1', 'localhost'])
 
 INSTALLED_APPS = [
-    'banners.apps.BannersConfig',
-    'foodcartapp.apps.FoodcartappConfig',
-    'restaurateur.apps.RestaurateurConfig',
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
@@ -36,6 +30,9 @@ INSTALLED_APPS = [
     'rest_framework.authtoken',
     'phonenumber_field',
     'django_extensions',
+    'foodcartapp.apps.FoodcartappConfig',
+    'restaurateur.apps.RestaurateurConfig',
+    'banners.apps.BannersConfig',
 ]
 
 MIDDLEWARE = [
@@ -90,9 +87,9 @@ MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
 MEDIA_URL = '/media/'
 
 DATABASES = {
-    'default': dj_database_url.config('DATABASE_URL',
-                                      default='sqlite:////{0}'.format(os.path.join(BASE_DIR, 'db.sqlite3'))
-                                      )
+    'default': dj_database_url.config(
+        default='sqlite:////{0}'.format(os.path.join(BASE_DIR, 'db.sqlite3')),
+    ),
 }
 
 AUTH_PASSWORD_VALIDATORS = [
