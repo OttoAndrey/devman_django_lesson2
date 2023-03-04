@@ -12,3 +12,4 @@ django-phonenumber-field[phonenumbers]==7.0.2
 django-extensions==3.2.1
 factory-boy==3.2.1
 gunicorn==20.1.0
+rollbar==0.16.3

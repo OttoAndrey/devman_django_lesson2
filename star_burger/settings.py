@@ -11,7 +11,7 @@ env.read_env()
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
 
-
+ENVIRONMENT = env.str('ENVIRONMENT', 'development')
 SECRET_KEY = env('SECRET_KEY', 'some-secret-key-for-local-env')
 DEBUG = env.bool('DEBUG', True)
 
@@ -44,6 +44,7 @@ MIDDLEWARE = [
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
     'debug_toolbar.middleware.DebugToolbarMiddleware',
+    'rollbar.contrib.django.middleware.RollbarNotifierMiddlewareExcluding404',
 ]
 
 ROOT_URLCONF = 'star_burger.urls'
@@ -139,7 +140,7 @@ REST_FRAMEWORK = {
 
 }
 
-YA_GEOCODER_API_KEY = env.str('YA_GEOCODER_API_KEY')
+YA_GEOCODER_API_KEY = env.str('YA_GEOCODER_API_KEY', "")
 
 CACHES = {
     'default': {
@@ -150,3 +151,11 @@ CACHES = {
 
 PHONENUMBER_DB_FORMAT = 'E164'
 PHONENUMBER_DEFAULT_REGION = 'RU'
+
+ROLLBAR_ACCESS_TOKEN = env.str("ROLLBAR_ACCESS_TOKEN", "")
+ROLLBAR = {
+    'access_token': ROLLBAR_ACCESS_TOKEN,
+    'environment': ENVIRONMENT,
+    'code_version': '1.0',
+    'root': BASE_DIR,
+}

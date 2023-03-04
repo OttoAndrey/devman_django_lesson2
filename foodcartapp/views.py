@@ -14,7 +14,6 @@ from .serializers import OrderSerializer
 
 def banners_list_api(request):
     banners = Banner.objects.filter(active=True)
-
     dumped_banners = []
     for banner in banners:
         dumped_banner = {
