@@ -157,7 +157,9 @@ Parcel будет следить за файлами в каталоге `bundle
 - `SECRET_KEY` — секретный ключ проекта. Им зашифрованы все пароли на вашем сайте, например. Не стоит использовать значение по-умолчанию;
 - `ALLOWED_HOSTS` — доступные адреса, [см. документацию Django](https://docs.djangoproject.com/en/3.1/ref/settings/#allowed-hosts);
 - `DATABASE_NAME` — путь до базы данных, например: `db.sqlite3`;
-- `YA_GEOCODER_API_KEY` - api ключ от [геокодера Яндекса](https://developer.tech.yandex.ru/services/).
+- `YA_GEOCODER_API_KEY` - api ключ от [геокодера Яндекса](https://developer.tech.yandex.ru/services/);
+- `ROLLBAR_ACCESS_TOKEN` - токен для Rollbar;
+- `DB_URL` - URL для БД в формате `postgres://USER:PASSWORD@HOST:PORT/NAME`, [документация dj-database-url](https://github.com/jazzband/dj-database-url);
 
 
 ## Цели проекта
