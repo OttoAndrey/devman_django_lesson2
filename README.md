@@ -148,6 +148,14 @@ Parcel будет следить за файлами в каталоге `bundle
 ./node_modules/.bin/parcel build bundles-src/index.js --dist-dir bundles --public-url="./"
 ```
 
+## Production deploy
+
+* Run script
+
+```bash
+./deploy_star_burger.sh
+```
+
 ## Переменные окружения
 
 Часть настроек проекта берётся из переменных окружения. Чтобы их определить, создайте файл `.env` рядом с `settings.py` и запишите туда данные в таком формате: `ПЕРЕМЕННАЯ=значение`.
