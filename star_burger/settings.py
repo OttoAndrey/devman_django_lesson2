@@ -153,9 +153,11 @@ PHONENUMBER_DB_FORMAT = 'E164'
 PHONENUMBER_DEFAULT_REGION = 'RU'
 
 ROLLBAR_ACCESS_TOKEN = env.str("ROLLBAR_ACCESS_TOKEN", "")
-ROLLBAR = {
-    'access_token': ROLLBAR_ACCESS_TOKEN,
-    'environment': ENVIRONMENT,
-    'code_version': '1.0',
-    'root': BASE_DIR,
-}
+
+if not DEBUG:
+    ROLLBAR = {
+        'access_token': ROLLBAR_ACCESS_TOKEN,
+        'environment': ENVIRONMENT,
+        'code_version': '1.0',
+        'root': BASE_DIR,
+    }
