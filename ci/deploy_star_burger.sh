@@ -11,7 +11,7 @@ python3 manage.py collectstatic --no-input
 echo "Migrations for Django"
 python3 manage.py migrate --no-input
 echo "Systemd reload"
-systemctl start starburger.service
+systemctl daemon-reload
 echo "Rollbar deploy notification"
 last_commit=$(git rev-parse HEAD)
 curl -H "X-Rollbar-Access-Token: " \
