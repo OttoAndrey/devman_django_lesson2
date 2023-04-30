@@ -12,7 +12,7 @@ BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
 
 ENVIRONMENT = env.str('ENVIRONMENT', 'development')
-SECRET_KEY = env('SECRET_KEY', 'some-secret-key-for-local-env')
+SECRET_KEY = env('SECRET_KEY')
 DEBUG = env.bool('DEBUG', True)
 
 ALLOWED_HOSTS = env.list('ALLOWED_HOSTS', ['127.0.0.1', 'localhost'])
@@ -153,9 +153,11 @@ PHONENUMBER_DB_FORMAT = 'E164'
 PHONENUMBER_DEFAULT_REGION = 'RU'
 
 ROLLBAR_ACCESS_TOKEN = env.str("ROLLBAR_ACCESS_TOKEN", "")
-ROLLBAR = {
-    'access_token': ROLLBAR_ACCESS_TOKEN,
-    'environment': ENVIRONMENT,
-    'code_version': '1.0',
-    'root': BASE_DIR,
-}
+
+if not DEBUG:
+    ROLLBAR = {
+        'access_token': ROLLBAR_ACCESS_TOKEN,
+        'environment': ENVIRONMENT,
+        'code_version': '1.0',
+        'root': BASE_DIR,
+    }
