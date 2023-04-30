@@ -7,9 +7,9 @@ npm ci
 echo "Update frontend"
 ./node_modules/.bin/parcel build bundles-src/index.js --dist-dir bundles --public-url="./"
 echo "Update Django static"
-python3 manage.py collectstatic --noinput
+python3 manage.py collectstatic --no-input
 echo "Migrations for Django"
-python3 manage.py migrate
+python3 manage.py migrate --no-input
 echo "Systemd reload"
 systemctl start starburger.service
 echo "Rollbar deploy notification"
