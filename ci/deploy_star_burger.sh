@@ -3,7 +3,7 @@ echo "Update backend dependencies"
 source .venv/bin/activate
 pip3 install -r requirements.txt
 echo "Update frontend dependencies"
-npm install
+npm ci
 echo "Update frontend"
 ./node_modules/.bin/parcel build bundles-src/index.js --dist-dir bundles --public-url="./"
 echo "Update Django static"
