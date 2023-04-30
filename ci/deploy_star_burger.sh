@@ -13,8 +13,9 @@ python3 manage.py migrate --no-input
 echo "Systemd reload"
 systemctl daemon-reload
 echo "Rollbar deploy notification"
+source .env
 last_commit=$(git rev-parse HEAD)
-curl -H "X-Rollbar-Access-Token: " \
+curl -H "X-Rollbar-Access-Token: $ROLLBAR_ACCESS_TOKEN" \
 -H "Content-Type: application/json" \
 -X POST 'https://api.rollbar.com/api/1/deploy' \
 -d '{"environment": "production", "revision": "'"$last_commit"'", "rollbar_name": "Starburger", "comment": "Bash script deployment", "status": "succeeded"}'
