@@ -169,6 +169,7 @@ Parcel будет следить за файлами в каталоге `bundle
 - `DATABASE_NAME` — путь до базы данных, например: `db.sqlite3`;
 - `YA_GEOCODER_API_KEY` - api ключ от [геокодера Яндекса](https://developer.tech.yandex.ru/services/);
 - `ROLLBAR_ACCESS_TOKEN` - токен для Rollbar;
+- `ROLLBAR_ENABLED` - включает Rollbar;
 - `DB_URL` - URL для БД в формате `postgres://USER:PASSWORD@HOST:PORT/NAME`, [документация dj-database-url](https://github.com/jazzband/dj-database-url);
 
 
