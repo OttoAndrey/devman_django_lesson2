@@ -10,8 +10,8 @@ echo "Update Django static"
 python3 manage.py collectstatic --no-input
 echo "Migrations for Django"
 python3 manage.py migrate --no-input
-echo "Systemd reload"
-systemctl daemon-reload
+echo "Nginx reload"
+systemctl reload nginx
 echo "Rollbar deploy notification"
 source .env
 last_commit=$(git rev-parse HEAD)
